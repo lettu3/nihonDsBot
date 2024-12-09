@@ -1,0 +1,46 @@
+# Archivos generados por Visual Studio
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vcxproj.user
+
+# Archivos de Build de .NET
+bin/
+obj/
+out/
+
+# Paquetes NuGet
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Configuración local de IDEs
+*.sln.ide
+*.csproj.user
+
+# Logs, debug y análisis
+*.log
+*.tlog
+*.vspscc
+*.ruleset
+.DS_Store
+.vs/
+*.coverage
+*.coveragexml
+
+# Configuración temporal de depuración
+*.pidb
+*.opendb
+
+# Archivos de publicación
+*.publishsettings
+*.pfx
+*.key
+
+# Otros
+.env
