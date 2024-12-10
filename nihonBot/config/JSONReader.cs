@@ -7,7 +7,7 @@ namespace NihonBot.config
 {
     internal class JSONReader
     {
-        public string Token {get; private set;}
+        public string? Token {get; private set;}
 
         public async Task ReadJSON(){
             try

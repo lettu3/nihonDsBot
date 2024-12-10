@@ -8,13 +8,16 @@ namespace NihonBot
 {
     public class Program
     {
-        private static DiscordSocketClient _client;
+        private static DiscordSocketClient? _client;
 
         public static async Task Main ()
         {
             var config = new DiscordSocketConfig
             {
-                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages
+                GatewayIntents = GatewayIntents.Guilds 
+                               | GatewayIntents.GuildMessages 
+                               | GatewayIntents.DirectMessages 
+                               | GatewayIntents.MessageContent
             };
             _client = new DiscordSocketClient(config);
 
@@ -39,10 +42,12 @@ namespace NihonBot
         private static async Task HandleMessageAsync(SocketMessage message)
         {
             if (message.Author.IsBot) return;
+            
+            Console.WriteLine($"[{message.Author.Username}]: {message.Content}");
 
             if (message.Content.ToLower() == "!ping")
             {
-                await message.Channel.SendMessageAsync("Pong!");
+                await message.Channel.SendMessageAsync("ポン!");
             }
         }
     }
