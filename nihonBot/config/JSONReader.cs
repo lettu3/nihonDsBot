@@ -18,7 +18,8 @@ namespace NihonBot.config
 
                 var jsonDocument = JsonDocument.Parse(jsonContent);
 
-                if (jsonDocument.RootElement.TryGetProperty("token", out var tokenElement)){
+                if (jsonDocument.RootElement.TryGetProperty("token", out var tokenElement))
+                {
                     Token = tokenElement.GetString();
                 }
                 else
