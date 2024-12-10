@@ -1,7 +1,9 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using NihonBot.config;
 
 namespace NihonBot
@@ -9,8 +11,12 @@ namespace NihonBot
     public class Program
     {
         private static DiscordSocketClient? _client;
+        private static CommandService? _commands;
+        private static IServiceProvider? _services;
 
-        public static async Task Main ()
+        static void Main(string[] args) => RunAsync().GetAwaiter().GetResult();
+
+        public static async Task RunAsync()
         {
             var config = new DiscordSocketConfig
             {
@@ -19,10 +25,18 @@ namespace NihonBot
                                | GatewayIntents.DirectMessages 
                                | GatewayIntents.MessageContent
             };
-            _client = new DiscordSocketClient(config);
 
-            _client.Log += Log;
-            _client.MessageReceived += HandleMessageAsync;
+            //client
+            _client = new DiscordSocketClient(config);
+            _commands = new CommandService();
+            _services = new ServiceCollection()
+                        .AddSingleton(_client)
+                        .AddSingleton(_commands)
+                        .AddSingleton<LoggingService>()
+                        .BuildServiceProvider();
+
+            var loggingService = _services.GetRequiredService<LoggingService>();
+
             // Config token
             var reader = new JSONReader();
             await reader.ReadJSON();
@@ -32,13 +46,6 @@ namespace NihonBot
             await Task.Delay(-1);
         }
         
-        private static Task Log(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
-
-
         private static async Task HandleMessageAsync(SocketMessage message)
         {
             if (message.Author.IsBot) return;
@@ -50,5 +57,6 @@ namespace NihonBot
                 await message.Channel.SendMessageAsync("ポン!");
             }
         }
+
     }
 }
