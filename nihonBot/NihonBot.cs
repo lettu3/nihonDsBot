@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using NihonBot.config;
+using NihonBot.Commands;
 
 namespace NihonBot
 {
@@ -33,10 +34,12 @@ namespace NihonBot
                         .AddSingleton(_client)
                         .AddSingleton(_commands)
                         .AddSingleton<LoggingService>()
+                        .AddSingleton<CommandHandlerService>()
                         .BuildServiceProvider();
 
             var loggingService = _services.GetRequiredService<LoggingService>();
-
+            var commandHandler = _services.GetRequiredService<CommandHandlerService>();
+            await commandHandler.InitializeAsync();
             // Config token
             var reader = new JSONReader();
             await reader.ReadJSON();
@@ -44,19 +47,6 @@ namespace NihonBot
             await _client.LoginAsync(TokenType.Bot, reader.Token);
             await _client.StartAsync();
             await Task.Delay(-1);
-        }
-        
-        private static async Task HandleMessageAsync(SocketMessage message)
-        {
-            if (message.Author.IsBot) return;
-            
-            Console.WriteLine($"[{message.Author.Username}]: {message.Content}");
-
-            if (message.Content.ToLower() == "!ping")
-            {
-                await message.Channel.SendMessageAsync("ポン!");
-            }
-        }
-
+        }        
     }
 }
