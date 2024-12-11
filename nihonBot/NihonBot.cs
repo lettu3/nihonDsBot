@@ -38,7 +38,7 @@ namespace NihonBot
                         .AddSingleton(_commands)
                         .AddSingleton<LoggingService>()
                         .AddSingleton<CommandHandlerService>()
-                        .AddSingleton(new GifRepository("gif"))
+                        .AddSingleton(new GifRepository("gif")) //Path to your gif directory
                         .BuildServiceProvider();
 
             var loggingService = _services.GetRequiredService<LoggingService>();
