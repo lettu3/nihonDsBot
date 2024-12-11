@@ -1,16 +1,26 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using NihonBot.config;
+using NihonBot.Commands;
 
 namespace NihonBot
 {
     public class Program
     {
         private static DiscordSocketClient? _client;
+        private static CommandService? _commands;
+        private static IServiceProvider? _services;
 
-        public static async Task Main ()
+        static void Main(string[] args)
+        {
+            DatabaseInitializer.Initialize();
+            RunAsync().GetAwaiter().GetResult();
+        }
+        public static async Task RunAsync()
         {
             var config = new DiscordSocketConfig
             {
@@ -19,36 +29,31 @@ namespace NihonBot
                                | GatewayIntents.DirectMessages 
                                | GatewayIntents.MessageContent
             };
-            _client = new DiscordSocketClient(config);
 
-            _client.Log += Log;
-            _client.MessageReceived += HandleMessageAsync;
-            // Config token
+            //client
+            _client = new DiscordSocketClient(config);
+            _commands = new CommandService();
+            _services = new ServiceCollection()
+                        .AddSingleton(_client)
+                        .AddSingleton(_commands)
+                        .AddSingleton<LoggingService>()
+                        .AddSingleton<CommandHandlerService>()
+                        .AddSingleton(new GifRepository("gif")) //Path to your gif directory
+                        .BuildServiceProvider();
+
+            var loggingService = _services.GetRequiredService<LoggingService>();
+            var commandHandler = _services.GetRequiredService<CommandHandlerService>();
+            await commandHandler.InitializeAsync();
+
+            var gifRepository = _services.GetRequiredService<GifRepository>();
+            gifRepository.ClearDatabase();
+            gifRepository.AddGifs(1, 21);
             var reader = new JSONReader();
             await reader.ReadJSON();
 
             await _client.LoginAsync(TokenType.Bot, reader.Token);
             await _client.StartAsync();
             await Task.Delay(-1);
-        }
-        
-        private static Task Log(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
-
-
-        private static async Task HandleMessageAsync(SocketMessage message)
-        {
-            if (message.Author.IsBot) return;
-            
-            Console.WriteLine($"[{message.Author.Username}]: {message.Content}");
-
-            if (message.Content.ToLower() == "!ping")
-            {
-                await message.Channel.SendMessageAsync("ポン!");
-            }
-        }
+        }        
     }
 }
