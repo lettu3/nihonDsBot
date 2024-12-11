@@ -15,8 +15,11 @@ namespace NihonBot
         private static CommandService? _commands;
         private static IServiceProvider? _services;
 
-        static void Main(string[] args) => RunAsync().GetAwaiter().GetResult();
-
+        static void Main(string[] args)
+        {
+            DatabaseInitializer.Initialize();
+            RunAsync().GetAwaiter().GetResult();
+        }
         public static async Task RunAsync()
         {
             var config = new DiscordSocketConfig
@@ -35,12 +38,16 @@ namespace NihonBot
                         .AddSingleton(_commands)
                         .AddSingleton<LoggingService>()
                         .AddSingleton<CommandHandlerService>()
+                        .AddSingleton(new GifRepository("gif"))
                         .BuildServiceProvider();
 
             var loggingService = _services.GetRequiredService<LoggingService>();
             var commandHandler = _services.GetRequiredService<CommandHandlerService>();
             await commandHandler.InitializeAsync();
-            // Config token
+
+            var gifRepository = _services.GetRequiredService<GifRepository>();
+            gifRepository.ClearDatabase();
+            gifRepository.AddGifs(1, 21);
             var reader = new JSONReader();
             await reader.ReadJSON();
 
